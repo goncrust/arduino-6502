@@ -8,6 +8,7 @@
  * https://github.com/goncrust/arduino-6502/blob/main/LICENSE
  */
 
+//#include "pins.h"
 
 #define LITTLE_ENDIAN
 
@@ -20,12 +21,13 @@
 
 
 // Data Size
-typedef unsigned char BYTE
-typedef short WORD
+typedef unsigned char BYTE;
+typedef short WORD;
 
 
 class CPU {
-private:
+//private:
+public:
 
   // --------------------------------------------------------------------------
 
@@ -43,7 +45,8 @@ private:
   WORD PC; // The value of program counter is modified automatically as instructions are executed.
 
   // Stack Pointer
-  BYTE SP; // The CPU does not detect if the stack is overflowed by excessive pushing or pulling operations and will most likely result in the program crashing.
+  // Can't use SP as a name since it's reserved.
+  BYTE SP_; // The CPU does not detect if the stack is overflowed by excessive pushing or pulling operations and will most likely result in the program crashing.
 
   // Accumulator
   BYTE A;
@@ -65,7 +68,7 @@ private:
   //             7             6                     5                             4                3               2                 1             0
   BYTE P; // Negative (N)  Overflow (V)   User status or mode bit (unused)    Break Command     Decimal (D)   IRQB disable (I)     Zero (Z)    Carry (C)
 
-public:
+//public:
 
   // -------------------------------- PINS ------------------------------------
 
@@ -139,7 +142,7 @@ public:
 
   // Read from specified processor status flag
   int read_P(int bit) {
-    return (P >> bit) & 0x00000001
+    return (P >> bit) & 0x00000001;
   }
 
   // Write to specified processor status flag
@@ -170,13 +173,119 @@ public:
     P &= mask;
   }
 
-  // Reset Sequence (7 clock cicle)
-  void reset() {
+  // Address Bus
+  void output_A(WORD address) {
 
-    //...
+    for (int i = 0; i < 16; i++) {
+        
+      int value = (address >> i) & 0b0000000000000001;
 
+      if (i == 0) digitalWrite(A0P, value);
+      else if (i == 1) digitalWrite(A1P, value);
+      else if (i == 2) digitalWrite(A2P, value);
+      else if (i == 3) digitalWrite(A3P, value);
+      else if (i == 4) digitalWrite(A4P, value);
+      else if (i == 5) digitalWrite(A5P, value);
+      else if (i == 6) digitalWrite(A6P, value);
+      else if (i == 7) digitalWrite(A7P, value);
+      else if (i == 8) digitalWrite(A8P, value);
+      else if (i == 9) digitalWrite(A9P, value);
+      else if (i == 10) digitalWrite(A10P, value);
+      else if (i == 11) digitalWrite(A11P, value);
+      else if (i == 12) digitalWrite(A12P, value);
+      else if (i == 13) digitalWrite(A13P, value);
+      else if (i == 14) digitalWrite(A14P, value);
+      else if (i == 15) digitalWrite(A15P, value);
+
+    }
+    
+  }
+
+  // Data Bus Read
+  BYTE read_D () {
+
+    WORD data = 0;
+  
+    if (digitalRead(D0P)) {
+      data |= 0b00000001;
+      } 
+    if (digitalRead(D1P)) {
+      data |= 0b00000010;
+    } 
+    if (digitalRead(D2P)) {
+      data |= 0b00000100;
+    } 
+    if (digitalRead(D3P)) {
+      data |= 0b00001000;
+    } 
+    if (digitalRead(D4P)) {
+      data |= 0b00010000;
+    } 
+    if (digitalRead(D5P)) {
+      data |= 0b00100000;
+    } 
+    if (digitalRead(D6P)) {
+      data |= 0b01000000;
+    } 
+    if (digitalRead(D7P)) {
+      data |= 0b10000000;
+    } 
+
+    return data;
+    
+  }
+
+  // Data Bus Write
+  void output_D (BYTE data) {
+
+    for (int i = 0; i < 8; i++) {
+        
+      int value = (data >> i) & 0b00000001;
+
+      if (i == 0) digitalWrite(D0P, value);
+      else if (i == 1) digitalWrite(D0P, value);
+      else if (i == 2) digitalWrite(D1P, value);
+      else if (i == 3) digitalWrite(D2P, value);
+      else if (i == 4) digitalWrite(D3P, value);
+      else if (i == 5) digitalWrite(D4P, value);
+      else if (i == 6) digitalWrite(D5P, value);
+      else if (i == 7) digitalWrite(D6P, value);
+
+    }
 
   }
 
-}
+  // Read from Address
+  BYTE read (WORD address) {
+
+    // Set RWB to R state
+    digitalWrite(RWBP, HIGH);
+    setDataBus(1);
+
+    // Output address in address bus
+    output_A(address);
+
+    delay(50);
+
+    // Read address from data bus
+    return read_D();
+    
+  }
+
+  // Reset Sequence (7 clock cicle)
+  void reset() {
+
+    Serial.print("reset");
+    //...
+    // Load ProgramCounter
+    BYTE least = read(0xFFFC);
+    BYTE most = read(0xFFFD);
+    PC = 0;
+    PC |= most;
+    PC <<= 8;
+    PC |= least;
+
+  }
+
+};
 

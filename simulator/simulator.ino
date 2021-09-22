@@ -8,54 +8,59 @@
  * https://github.com/goncrust/arduino-6502/blob/main/LICENSE
  */
 
+void setDataBus(int mode);
+//#include "cpu/pins.h"
+
 
 // RIGHT
-#define RWB 7
+#define RWBP 7
 // NC not used
-#define BE 8
-#define PHI2 9
-#define SOB 10
-#define PHI2O 11
-#define RESB 12
+#define BEP 8
+#define PHI2P 9
+#define SOBP 10
+#define PHI2OP 11
+#define RESBP 12
 // VSS not used
 
 // LEFT
-#define VPB 1
-#define RDY 2
-#define PHI1O 3 
-#define IRQB 4
-#define MLB 5
-#define NMIB 6
-#define SYNC 7
+#define VPBP 1
+#define RDYP 2
+#define PHI1OP 3 
+#define IRQBP 4
+#define MLBP 5
+#define NMIBP 6
+#define SYNCP 7
 // VDD not used
 
 // DATA BUS
-#define D0 22
-#define D1 24
-#define D2 26
-#define D3 28
-#define D4 30
-#define D5 32
-#define D6 34
-#define D7 36
+#define D0P 22
+#define D1P 24
+#define D2P 26
+#define D3P 28
+#define D4P 30
+#define D5P 32
+#define D6P 34
+#define D7P 36
 
 // ADDRESS BUS
-#define A0 23
-#define A1 25
-#define A2 27
-#define A3 29
-#define A4 31
-#define A5 33
-#define A6 35
-#define A7 37
-#define A8 39
-#define A9 41
-#define A10 43
-#define A11 45
-#define A12 47
-#define A13 49
-#define A14 51
-#define A15 53
+#define A0P 23
+#define A1P 25
+#define A2P 27
+#define A3P 29
+#define A4P 31
+#define A5P 33
+#define A6P 35
+#define A7P 37
+#define A8P 39
+#define A9P 41
+#define A10P 43
+#define A11P 45
+#define A12P 47
+#define A13P 49
+#define A14P 51
+#define A15P 53
+
+#include "cpu/cpu.h"
 
 /* Set Data Bus pin mode 
  *  mode = 0 -> Output 
@@ -64,65 +69,90 @@
 void setDataBus(int mode) {
 
   if (mode) {
-    pinMode(D0, INPUT);
-    pinMode(D1, INPUT);
-    pinMode(D2, INPUT);
-    pinMode(D3, INPUT);
-    pinMode(D4, INPUT);
-    pinMode(D5, INPUT);
-    pinMode(D6, INPUT);
-    pinMode(D7, INPUT);
+    pinMode(D0P, INPUT);
+    pinMode(D1P, INPUT);
+    pinMode(D2P, INPUT);
+    pinMode(D3P, INPUT);
+    pinMode(D4P, INPUT);
+    pinMode(D5P, INPUT);
+    pinMode(D6P, INPUT);
+    pinMode(D7P, INPUT);
   } else {
-    pinMode(D0, OUTPUT);
-    pinMode(D1, OUTPUT);
-    pinMode(D2, OUTPUT);
-    pinMode(D3, OUTPUT);
-    pinMode(D4, OUTPUT);
-    pinMode(D5, OUTPUT);
-    pinMode(D6, OUTPUT);
-    pinMode(D7, OUTPUT);
+    pinMode(D0P, OUTPUT);
+    pinMode(D1P, OUTPUT);
+    pinMode(D2P, OUTPUT);
+    pinMode(D3P, OUTPUT);
+    pinMode(D4P, OUTPUT);
+    pinMode(D5P, OUTPUT);
+    pinMode(D6P, OUTPUT);
+    pinMode(D7P, OUTPUT);
   }
 
 }
 
+
+// CPU
+CPU cpu;
+
 void setup() {
 
   // Address Bus
-  pinMode(A0, OUTPUT);
-  pinMode(A1, OUTPUT);
-  pinMode(A2, OUTPUT);
-  pinMode(A3, OUTPUT);
-  pinMode(A4, OUTPUT);
-  pinMode(A5, OUTPUT);
-  pinMode(A6, OUTPUT);
-  pinMode(A7, OUTPUT);
-  pinMode(A8, OUTPUT);
-  pinMode(A9, OUTPUT);
-  pinMode(A10, OUTPUT);
-  pinMode(A11, OUTPUT);
-  pinMode(A12, OUTPUT);
-  pinMode(A13, OUTPUT);
-  pinMode(A14, OUTPUT);
-  pinMode(A15, OUTPUT);
+  pinMode(A0P, OUTPUT);
+  pinMode(A1P, OUTPUT);
+  pinMode(A2P, OUTPUT);
+  pinMode(A3P, OUTPUT);
+  pinMode(A4P, OUTPUT);
+  pinMode(A5P, OUTPUT);
+  pinMode(A6P, OUTPUT);
+  pinMode(A7P, OUTPUT);
+  pinMode(A8P, OUTPUT);
+  pinMode(A9P, OUTPUT);
+  pinMode(A10P, OUTPUT);
+  pinMode(A11P, OUTPUT);
+  pinMode(A12P, OUTPUT);
+  pinMode(A13P, OUTPUT);
+  pinMode(A14P, OUTPUT);
+  pinMode(A15P, OUTPUT);
 
   // Data Bus
   setDataBus(0);
 
-  pinMode(BE, INPUT);
-  pinMode(IRQB, INPUT);
-  pinMode(MLB, OUTPUT);
-  pinMode(NMIB, INPUT);
-  pinMode(PHI2, INPUT);
-  pinMode(PHI2O, OUTPUT);
-  pinMode(PHI1O, OUTPUT);
-  pinMode(RWB, OUTPUT);
-  pinMode(RDY, INPUT);
-  pinMode(RESB, INPUT);
-  pinMode(SOB, INPUT);
-  pinMode(SYNC, OUTPUT);
-  pinMode(VPB, OUTPUT);
+  pinMode(BEP, INPUT); // if low, Address, Data and RWB should not be enabled
+  pinMode(IRQBP, INPUT); // interrupt
+  pinMode(MLBP, OUTPUT);
+  pinMode(NMIBP, INPUT); // interrupt
+  pinMode(PHI2P, INPUT); // clock
+  pinMode(PHI2OP, OUTPUT);
+  pinMode(PHI1OP, OUTPUT);
+  pinMode(RWBP, OUTPUT);
+  pinMode(RDYP, INPUT); // if low, halt the cpu
+  pinMode(RESBP, INPUT); // reset
+  pinMode(SOBP, INPUT); // if low set overflow bit (V) in the status code register (should not be used)
+  pinMode(SYNCP, OUTPUT);
+  pinMode(VPBP, OUTPUT);
+  
+  // PIN 13 as reset indicator
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
 
+
+  // Serial port
+  Serial.begin(9600);
 }
 
 void loop() {
+
+  // Check RDY
+  if (digitalRead(RDYP)) {
+
+    if (!digitalRead(RESBP)) {
+      cpu.reset();
+    }
+
+  }
+
+  if (cpu.PC != 0) {
+    Serial.println(cpu.PC, HEX);
+  }
+
 }
