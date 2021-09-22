@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-#define LITTLE_ENDIAN
+#define USING_LITTLE_ENDIAN
 
 // ----------------------------  Defenitions ---------------------------------
 
@@ -22,8 +22,8 @@
 
 
 // Data Size
-typedef unsigned char BYTE
-typedef short WORD
+typedef unsigned char BYTE;
+typedef short WORD;
 
 
 class CPU {
@@ -141,7 +141,7 @@ public:
 
   // Read from specified processor status flag
   int read_P(int bit) {
-    return (P >> bit) & 0x00000001
+    return (P >> bit) & 0x00000001;
   }
 
   // Write to specified processor status flag
@@ -180,7 +180,7 @@ public:
 
   }
 
-}
+};
 
 
 

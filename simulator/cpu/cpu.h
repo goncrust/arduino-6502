@@ -10,7 +10,7 @@
 
 //#include "pins.h"
 
-#define LITTLE_ENDIAN
+#define USING_LITTLE_ENDIAN
 
 // ----------------------------  Defenitions ---------------------------------
 
