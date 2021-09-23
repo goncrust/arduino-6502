@@ -1,6 +1,6 @@
 /*
  * arduino-6502 (https://github.com/goncrust/arduino-6502)
- * 
+ *
  * Arduino main functions.
  *
  * Copyright (c) 2021 by goncrust
@@ -8,6 +8,10 @@
  * https://github.com/goncrust/arduino-6502/blob/main/LICENSE
  */
 
+void update_general_outputs();
+void update_general_inputs();
+void update_address_bus();
+void update_data_bus();
 void setDataBus(int mode);
 //#include "cpu/pins.h"
 
@@ -25,7 +29,7 @@ void setDataBus(int mode);
 // LEFT
 #define VPBP 1
 #define RDYP 2
-#define PHI1OP 3 
+#define PHI1OP 3
 #define IRQBP 4
 #define MLBP 5
 #define NMIBP 6
@@ -62,11 +66,14 @@ void setDataBus(int mode);
 
 #include "cpu/cpu.h"
 
-/* Set Data Bus pin mode 
- *  mode = 0 -> Output 
+/* Set Data Bus pin mode
+ *  mode = 0 -> Output
  *  mode = 1 -> Input
  */
+int dataBusMode;
 void setDataBus(int mode) {
+
+  dataBusMode = mode;
 
   if (mode) {
     pinMode(D0P, INPUT);
@@ -124,13 +131,13 @@ void setup() {
   pinMode(PHI2P, INPUT); // clock
   pinMode(PHI2OP, OUTPUT);
   pinMode(PHI1OP, OUTPUT);
-  pinMode(RWBP, OUTPUT);
+  pinMode(RWBP, OUTPUT); // high -> input from data bus, low -> output from data bus
   pinMode(RDYP, INPUT); // if low, halt the cpu
   pinMode(RESBP, INPUT); // reset
   pinMode(SOBP, INPUT); // if low set overflow bit (V) in the status code register (should not be used)
   pinMode(SYNCP, OUTPUT);
   pinMode(VPBP, OUTPUT);
-  
+
   // PIN 13 as reset indicator
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
@@ -140,19 +147,99 @@ void setup() {
   Serial.begin(9600);
 }
 
-void loop() {
+void update_general_outputs() {
 
-  // Check RDY
-  if (digitalRead(RDYP)) {
+  // Outputs
+  digitalWrite(MLBP, cpu.BE);
+  digitalWrite(PHI2OP, cpu.PHI2O);
+  digitalWrite(PHI1OP, cpu.PHI1O);
+  digitalWrite(RWBP, cpu.RWB);
+  digitalWrite(SYNCP, cpu.SYNC);
+  digitalWrite(VPBP, cpu.VPB);
 
-    if (!digitalRead(RESBP)) {
-      cpu.reset();
-    }
+}
 
+void update_general_inputs() {
+
+  // Inputs
+  cpu.BE = digitalRead(BEP);
+  cpu.IRQB = digitalRead(IRQBP);
+  cpu.NMIB = digitalRead(NMIBP);
+  cpu.PHI2 = digitalRead(PHI2P);
+  cpu.RDY = digitalRead(RDYP);
+  cpu.RESB = digitalRead(RESBP);
+  cpu.SOB = digitalRead(SOBP);
+
+  // Reset Indicator
+  cpu.RESB ? digitalWrite(13, LOW) : digitalWrite(13, HIGH);
+
+}
+
+void update_address_bus() {
+
+  // Address bus (Output)
+  digitalWrite(A0P, cpu.A0);
+  digitalWrite(A1P, cpu.A1);
+  digitalWrite(A2P, cpu.A2);
+  digitalWrite(A3P, cpu.A3);
+  digitalWrite(A4P, cpu.A4);
+  digitalWrite(A5P, cpu.A5);
+  digitalWrite(A6P, cpu.A6);
+  digitalWrite(A7P, cpu.A7);
+  digitalWrite(A8P, cpu.A8);
+  digitalWrite(A9P, cpu.A9);
+  digitalWrite(A10P, cpu.A10);
+  digitalWrite(A11P, cpu.A11);
+  digitalWrite(A12P, cpu.A12);
+  digitalWrite(A13P, cpu.A13);
+  digitalWrite(A14P, cpu.A14);
+  digitalWrite(A15P, cpu.A15);
+
+}
+
+void update_data_bus() {
+
+  // Data Bus (Output)
+  if (!dataBusMode) {
+    digitalWrite(D0P, cpu.D0);
+    digitalWrite(D1P, cpu.D1);
+    digitalWrite(D2P, cpu.D2);
+    digitalWrite(D3P, cpu.D3);
+    digitalWrite(D4P, cpu.D4);
+    digitalWrite(D5P, cpu.D5);
+    digitalWrite(D6P, cpu.D6);
+    digitalWrite(D7P, cpu.D7);
+  }
+  // Data Bus (Input)
+  else {
+    cpu.D0 = digitalRead(D0P);
+    cpu.D1 = digitalRead(D1P);
+    cpu.D2 = digitalRead(D2P);
+    cpu.D3 = digitalRead(D3P);
+    cpu.D4 = digitalRead(D4P);
+    cpu.D5 = digitalRead(D5P);
+    cpu.D6 = digitalRead(D6P);
+    cpu.D7 = digitalRead(D7P);
   }
 
-  if (cpu.PC != 0) {
-    Serial.println(cpu.PC, HEX);
+}
+void update_pins() {
+
+  update_general_outputs();
+  update_general_inputs();
+  update_address_bus();
+  update_data_bus();
+
+}
+
+void loop() {
+
+  update_pins();
+
+  cpu.mainloop();
+
+  if (cpu.PC) {
+    Serial.print(cpu.PC, HEX);
   }
 
 }

@@ -88,6 +88,7 @@ public:
   WORD A12 : 1;
   WORD A13 : 1;
   WORD A14 : 1;
+  WORD A15 : 1;
 
   // Data Bus
   BYTE D0 : 1;
@@ -180,56 +181,45 @@ public:
         
       int value = (address >> i) & 0b0000000000000001;
 
-      if (i == 0) digitalWrite(A0P, value);
-      else if (i == 1) digitalWrite(A1P, value);
-      else if (i == 2) digitalWrite(A2P, value);
-      else if (i == 3) digitalWrite(A3P, value);
-      else if (i == 4) digitalWrite(A4P, value);
-      else if (i == 5) digitalWrite(A5P, value);
-      else if (i == 6) digitalWrite(A6P, value);
-      else if (i == 7) digitalWrite(A7P, value);
-      else if (i == 8) digitalWrite(A8P, value);
-      else if (i == 9) digitalWrite(A9P, value);
-      else if (i == 10) digitalWrite(A10P, value);
-      else if (i == 11) digitalWrite(A11P, value);
-      else if (i == 12) digitalWrite(A12P, value);
-      else if (i == 13) digitalWrite(A13P, value);
-      else if (i == 14) digitalWrite(A14P, value);
-      else if (i == 15) digitalWrite(A15P, value);
+      if (i == 0) A0 = value;
+      else if (i == 1) A1 = value;
+      else if (i == 2) A2 = value;
+      else if (i == 3) A3 = value;
+      else if (i == 4) A4 = value;
+      else if (i == 5) A5 = value;
+      else if (i == 6) A6 = value;
+      else if (i == 7) A7 = value;
+      else if (i == 8) A8 = value;
+      else if (i == 9) A9 = value;
+      else if (i == 10) A10 = value;
+      else if (i == 11) A11 = value;
+      else if (i == 12) A12 = value;
+      else if (i == 13) A13 = value;
+      else if (i == 14) A14 = value;
+      else if (i == 15) A15 = value;
 
     }
+
+    update_address_bus();
     
   }
 
   // Data Bus Read
   BYTE read_D () {
 
+    setDataBus(1);
+    update_data_bus();
+
     WORD data = 0;
   
-    if (digitalRead(D0P)) {
-      data |= 0b00000001;
-      } 
-    if (digitalRead(D1P)) {
-      data |= 0b00000010;
-    } 
-    if (digitalRead(D2P)) {
-      data |= 0b00000100;
-    } 
-    if (digitalRead(D3P)) {
-      data |= 0b00001000;
-    } 
-    if (digitalRead(D4P)) {
-      data |= 0b00010000;
-    } 
-    if (digitalRead(D5P)) {
-      data |= 0b00100000;
-    } 
-    if (digitalRead(D6P)) {
-      data |= 0b01000000;
-    } 
-    if (digitalRead(D7P)) {
-      data |= 0b10000000;
-    } 
+    if (D0) data |= 0b00000001;
+    if (D1) data |= 0b00000010;
+    if (D2) data |= 0b00000100;
+    if (D3) data |= 0b00001000;
+    if (D4) data |= 0b00010000;
+    if (D5) data |= 0b00100000;
+    if (D6) data |= 0b01000000;
+    if (D7) data |= 0b10000000;
 
     return data;
     
@@ -242,16 +232,19 @@ public:
         
       int value = (data >> i) & 0b00000001;
 
-      if (i == 0) digitalWrite(D0P, value);
-      else if (i == 1) digitalWrite(D0P, value);
-      else if (i == 2) digitalWrite(D1P, value);
-      else if (i == 3) digitalWrite(D2P, value);
-      else if (i == 4) digitalWrite(D3P, value);
-      else if (i == 5) digitalWrite(D4P, value);
-      else if (i == 6) digitalWrite(D5P, value);
-      else if (i == 7) digitalWrite(D6P, value);
+      if (i == 0) D0 = value;
+      else if (i == 1) D1 = value;
+      else if (i == 2) D2 = value;
+      else if (i == 3) D3 = value;
+      else if (i == 4) D4 = value;
+      else if (i == 5) D5 = value;
+      else if (i == 6) D6 = value;
+      else if (i == 7) D7 = value;
 
     }
+
+    setDataBus(0);
+    update_data_bus();
 
   }
 
@@ -259,8 +252,8 @@ public:
   BYTE read (WORD address) {
 
     // Set RWB to R state
-    digitalWrite(RWBP, HIGH);
-    setDataBus(1);
+    RWB = 1;
+    update_general_outputs();
 
     // Output address in address bus
     output_A(address);
@@ -272,10 +265,9 @@ public:
     
   }
 
-  // Reset Sequence (7 clock cicle)
+  // Reset Sequence (7 clock cicles)
   void reset() {
 
-    Serial.print("reset");
     //...
     // Load ProgramCounter
     BYTE least = read(0xFFFC);
@@ -284,6 +276,46 @@ public:
     PC |= most;
     PC <<= 8;
     PC |= least;
+
+  }
+
+  // Clock check variables
+  int last_clock = 0;
+  int cycles = 0;
+  //int clock_change;
+
+  // Main CPU loop
+  void mainloop() {
+
+    // Update clock variables
+    //clock_change = !(last_clock == PHI2);
+    if(!PHI2 && last_clock) {
+      cycles++;
+      Serial.print(cycles);
+    }
+    last_clock = PHI2;
+
+    // Check RDY pin
+    if (RDY) {
+
+      /*
+       * The processor counts a cycle every time
+       * the previous iteration of mainloop PHI2
+       * was high and now it's low.
+       */
+      if (cycles) {
+        cycles--;
+
+        // Reset signal check
+        if (!RESB) {
+
+          reset();
+
+        }
+
+      }
+
+    }
 
   }
 
