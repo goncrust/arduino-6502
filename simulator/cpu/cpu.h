@@ -249,7 +249,7 @@ public:
   }
 
   // Read from Address
-  BYTE read (WORD address) {
+  BYTE read(WORD address) {
 
     current_cycles++;
 
@@ -349,6 +349,9 @@ public:
   int in_reset_sequence = 0;
   //int clock_change;
 
+  // Instruction Variable
+  int instruction;
+
   // Main CPU loop
   void mainloop() {
 
@@ -378,6 +381,15 @@ public:
 
         } else if (in_reset_sequence) {
           reset();
+        }
+        // Normal execution
+        else {
+          if (!current_cycles || !instruction) {
+            instruction = read(PC);
+          }
+
+          // Increment PC
+          PC++;
         }
 
         // Debug
