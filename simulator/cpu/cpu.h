@@ -112,7 +112,7 @@ public:
   // Non-Maskable Interrupt
   WORD NMIB : 1;
 
-  // No Connect is not defined since this is an emulator and it's not needed.
+  // No Connect is not defined since it as no function.
 
   // Phase 2 In, Phase 2 Out and Phase 1 Out
   WORD PHI2 : 1;
@@ -267,7 +267,7 @@ public:
     
   }
 
-  // Reset Sequence (7 clock cicles + 2 to load pc)
+  // Reset Sequence (7 clock cycles + 2 to load pc)
   void reset() {
 
     if (current_cycles < 7) {
