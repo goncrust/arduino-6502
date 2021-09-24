@@ -251,6 +251,8 @@ public:
   // Read from Address
   BYTE read (WORD address) {
 
+    current_cycles++;
+
     // Set RWB to R state
     RWB = HIGH;
     update_general_outputs();
@@ -265,17 +267,32 @@ public:
     
   }
 
-  // Reset Sequence (7 clock cicles)
+  // Reset Sequence (7 clock cicles + 2 to load pc)
   void reset() {
 
-    //...
+    if (current_cycles < 7) {
+      // ...
+      current_cycles++;
+
+      return;
+    }
     // Load ProgramCounter
-    BYTE least = read(0xFFFC);
-    BYTE most = read(0xFFFD);
-    PC = 0;
-    PC |= most;
-    PC <<= 8;
-    PC |= least;
+    else if (current_cycles == 7) {
+
+      PC = 0;
+      BYTE least = read(0xFFFC);
+      PC |= least;
+
+      return;
+    } else if (current_cycles == 8) {
+      
+      BYTE most = read(0xFFFD);
+      PC |= (((WORD) most) << 8);
+
+    }
+
+    in_reset_sequence = 0;
+    current_cycles = 0;
 
   }
 
@@ -328,6 +345,8 @@ public:
   // Clock check variables
   int last_clock = 0;
   int cycles = 0;
+  int current_cycles = 0;
+  int in_reset_sequence = 0;
   //int clock_change;
 
   // Main CPU loop
@@ -354,8 +373,11 @@ public:
         // Reset signal check
         if (!RESB) {
 
+          in_reset_sequence = 1;
           reset();
 
+        } else if (in_reset_sequence) {
+          reset();
         }
 
         // Debug
