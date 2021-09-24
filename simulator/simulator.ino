@@ -27,13 +27,13 @@ void setDataBus(int mode);
 // VSS not used
 
 // LEFT
-#define VPBP 1
-#define RDYP 2
-#define PHI1OP 3
-#define IRQBP 4
-#define MLBP 5
-#define NMIBP 6
-#define SYNCP 7
+#define VPBP A0
+#define RDYP A1 
+#define PHI1OP 2 
+#define IRQBP 3 
+#define MLBP 4 
+#define NMIBP 5 
+#define SYNCP 6 
 // VDD not used
 
 // DATA BUS
@@ -150,11 +150,11 @@ void setup() {
 void update_general_outputs() {
 
   // Outputs
-  digitalWrite(MLBP, cpu.BE);
-  digitalWrite(PHI2OP, cpu.PHI2O);
-  digitalWrite(PHI1OP, cpu.PHI1O);
+  //digitalWrite(MLBP, cpu.MLB);
+  //digitalWrite(PHI2OP, cpu.PHI2O);
+  //digitalWrite(PHI1OP, cpu.PHI1O);
   digitalWrite(RWBP, cpu.RWB);
-  digitalWrite(SYNCP, cpu.SYNC);
+  //digitalWrite(SYNCP, cpu.SYNC);
   digitalWrite(VPBP, cpu.VPB);
 
 }
@@ -238,8 +238,8 @@ void loop() {
 
   cpu.mainloop();
 
-  if (cpu.PC) {
-    Serial.print(cpu.PC, HEX);
-  }
+  //if (cpu.PC) {
+  //  Serial.print(cpu.PC, HEX);
+  //}
 
 }

@@ -174,7 +174,7 @@ public:
     P &= mask;
   }
 
-  // Address Bus
+  // Address Bus Write
   void output_A(WORD address) {
 
     for (int i = 0; i < 16; i++) {
@@ -252,7 +252,7 @@ public:
   BYTE read (WORD address) {
 
     // Set RWB to R state
-    RWB = 1;
+    RWB = HIGH;
     update_general_outputs();
 
     // Output address in address bus
@@ -279,6 +279,52 @@ public:
 
   }
 
+  // Debug (Serial)
+  void debug() {
+    
+    // Program Counter
+    Serial.print(PC, HEX);
+
+    Serial.print("  ");
+    
+    // Address bus
+    A15 ? Serial.print("1") : Serial.print("0");
+    A14 ? Serial.print("1") : Serial.print("0");
+    A13 ? Serial.print("1") : Serial.print("0");
+    A12 ? Serial.print("1") : Serial.print("0");
+    A11 ? Serial.print("1") : Serial.print("0");
+    A10 ? Serial.print("1") : Serial.print("0");
+    A9 ? Serial.print("1") : Serial.print("0");
+    A8 ? Serial.print("1") : Serial.print("0");
+    A7 ? Serial.print("1") : Serial.print("0");
+    A6 ? Serial.print("1") : Serial.print("0");
+    A5 ? Serial.print("1") : Serial.print("0");
+    A4 ? Serial.print("1") : Serial.print("0");
+    A3 ? Serial.print("1") : Serial.print("0");
+    A2 ? Serial.print("1") : Serial.print("0");
+    A1 ? Serial.print("1") : Serial.print("0");
+    A0 ? Serial.print("1") : Serial.print("0");
+
+    Serial.print("    ");
+
+    // RWB
+    RWB ? Serial.print("R") : Serial.print("W");
+
+    Serial.print("    ");
+    
+    // Data bus
+    D7 ? Serial.print("1") : Serial.print("0");
+    D6 ? Serial.print("1") : Serial.print("0");
+    D5 ? Serial.print("1") : Serial.print("0");
+    D4 ? Serial.print("1") : Serial.print("0");
+    D3 ? Serial.print("1") : Serial.print("0");
+    D2 ? Serial.print("1") : Serial.print("0");
+    D1 ? Serial.print("1") : Serial.print("0");
+    D0 ? Serial.print("1") : Serial.print("0");
+
+    Serial.println("");
+  }
+
   // Clock check variables
   int last_clock = 0;
   int cycles = 0;
@@ -291,7 +337,6 @@ public:
     //clock_change = !(last_clock == PHI2);
     if(!PHI2 && last_clock) {
       cycles++;
-      Serial.print(cycles);
     }
     last_clock = PHI2;
 
@@ -312,6 +357,10 @@ public:
           reset();
 
         }
+
+        // Debug
+        debug();
+
 
       }
 
