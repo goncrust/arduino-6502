@@ -183,6 +183,8 @@ void loop() {
         outputD(0x42);
     } else if (address == 0x7FD) {
         outputD(0x40);
+    } else {
+      outputD(0x0);
     }
   }
 

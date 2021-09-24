@@ -150,11 +150,11 @@ void setup() {
 void update_general_outputs() {
 
   // Outputs
-  //digitalWrite(MLBP, cpu.MLB);
-  //digitalWrite(PHI2OP, cpu.PHI2O);
-  //digitalWrite(PHI1OP, cpu.PHI1O);
+  digitalWrite(MLBP, cpu.MLB);
+  digitalWrite(PHI2OP, cpu.PHI2O);
+  digitalWrite(PHI1OP, cpu.PHI1O);
   digitalWrite(RWBP, cpu.RWB);
-  //digitalWrite(SYNCP, cpu.SYNC);
+  digitalWrite(SYNCP, cpu.SYNC);
   digitalWrite(VPBP, cpu.VPB);
 
 }
