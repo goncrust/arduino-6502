@@ -918,11 +918,13 @@ public:
   void debug() {
     
     // Program Counter
+    Serial.print("PC: ");
     Serial.print(PC, HEX);
 
     Serial.print("  ");
     
     // Address bus
+    Serial.print("A: ");
     A15 ? Serial.print("1") : Serial.print("0");
     A14 ? Serial.print("1") : Serial.print("0");
     A13 ? Serial.print("1") : Serial.print("0");
@@ -948,6 +950,7 @@ public:
     Serial.print("    ");
     
     // Data bus
+    Serial.print("D: ");
     D7 ? Serial.print("1") : Serial.print("0");
     D6 ? Serial.print("1") : Serial.print("0");
     D5 ? Serial.print("1") : Serial.print("0");
@@ -957,6 +960,40 @@ public:
     D1 ? Serial.print("1") : Serial.print("0");
     D0 ? Serial.print("1") : Serial.print("0");
 
+    // Registers
+    Serial.println("");
+
+    Serial.print("A: ");
+    Serial.print(A, HEX);
+    
+    Serial.print("    ");
+    
+    Serial.print("X: ");
+    Serial.print(X, HEX);
+    
+    Serial.print("    ");
+
+    Serial.print("Y: ");
+    Serial.print(Y, HEX);
+    
+    Serial.print("    ");
+
+    Serial.println("");
+
+    Serial.print("P: ");
+    Serial.print(P, BIN);
+    Serial.println("");
+    Serial.print("   NVUBDIZC");
+
+    Serial.println("");
+
+    Serial.print("SP: ");
+    Serial.print(SP_, HEX);
+    
+    Serial.print("    ");
+    
+
+    Serial.println("");
     Serial.println("");
   }
 

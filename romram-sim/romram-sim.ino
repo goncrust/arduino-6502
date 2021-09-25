@@ -68,7 +68,7 @@ void setup() {
   // ROM: ($0400-$06F9)
   // Addresses of the non-maskable interrupt handler: ($06FA/B)
   // Power/reset location: ($06FC/D)
-  // BRK/interrupt request handler: ($07FE/F)
+  // BRK/interrupt request handler: ($06FE/F)
 
   // Memory
   mem[0x06FC] = 0x00;
