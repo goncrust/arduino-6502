@@ -55,15 +55,15 @@ THIS PROJECT IS STILL IN DEVELOPMENT, MANY FEATURES ARE NOT YET IMPLEMENTED.
 
 - Memory map:
 
-| Memory Address(es) | Function                                        |
-|--------------------|-------------------------------------------------|
-| 0x0000-0x00FF      | Zero Page (RAM)                                 |
-| 0x0100-0x01FF      | Stack (RAM)                                     |
-| 0x0200-0x03FF      | RAM                                             |
-| 0x0400-0x06F9      | ROM                                             |
-| 0x06FA/0x06FB      | Addresses of the non-maskable interrupt handler |
-| 0x06FC/0x06FD      | Power/reset location                            |
-| 0x06FE/0x06FF      | BRK/Interrupt request handler                   |
+| Memory Address(es) | Function                                              |
+|--------------------|-------------------------------------------------------|
+| 0x0000-0x00FF      | Zero Page (RAM)                                       |
+| 0x0100-0x01FF      | Stack (RAM)                                           |
+| 0x0200-0x03FF      | RAM                                                   |
+| 0x0400-0x06F9      | ROM                                                   |
+| 0x06FA/0x06FB      | Addresses of the non-maskable interrupt handler (ROM) |
+| 0x06FC/0x06FD      | Power/reset location (ROM)                            |
+| 0x06FE/0x06FF      | BRK/Interrupt request handler (ROM)                   |
 
 Note: You don't have to worry about the last addresses being mapped to 0x06FA... (instead of 0xFFFA...) because the memory simulator will do the translation. The processor still fetches from 0xFFFa... If you have your own RAM/ROM/IO chip everything should work as expected and you can map them as you wish.
 
