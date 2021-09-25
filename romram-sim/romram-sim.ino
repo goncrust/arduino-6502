@@ -56,9 +56,26 @@ void setDataBus(int mode) {
 
 }
 
-void setup() {
+// Actual memory
+BYTE mem[0x6FF + 1];
 
-  //Data Bus
+void setup() {  
+
+  // Decisions:
+  // Zero page (256 bytes): ($0000-$00FF)
+  // Stack (256 bytes): ($0100-$01FF)
+  // RAM: ($0200-$03FF)
+  // ROM: ($0400-$06F9)
+  // Addresses of the non-maskable interrupt handler: ($06FA/B)
+  // Power/reset location: ($06FC/D)
+  // BRK/interrupt request handler: ($07FE/F)
+
+  // Memory
+  mem[0x06FC] = 0x00;
+  mem[0x06FD] = 0x04; 
+  mem[0x0400] = 0x12;
+
+  // Data Bus
   setDataBus(0);
 
   // Address Bus 
@@ -152,40 +169,66 @@ WORD readAB () {
 }
 
 void outputD(BYTE data) {
+
+  setDataBus(0);
   
   for (int i = 0; i < 8; i++) {
 
-    Serial.println("OUTPUT");
     if ((data >> i) & 0b00000001) {
-      Serial.print("1");
       digitalWrite(i, HIGH);
     } else {
-      Serial.print("0");
       digitalWrite(i, LOW);
     }
-    Serial.println("");
 
   }
 
 }
 
+BYTE readD() {
+
+  setDataBus(1);
+
+  BYTE data = 0;
+
+  if (digitalRead(D0)) data |= 0b00000001;
+  if (digitalRead(D1)) data |= 0b00000010;
+  if (digitalRead(D2)) data |= 0b00000100;
+  if (digitalRead(D3)) data |= 0b00001000;
+  if (digitalRead(D4)) data |= 0b00010000;
+  if (digitalRead(D5)) data |= 0b00100000;
+  if (digitalRead(D6)) data |= 0b01000000;
+  if (digitalRead(D7)) data |= 0b10000000;
+
+  return data;
+}
+
+
 void loop() {
+    
+  // Read address bus
+  WORD address = readAB();
 
-  // READ
+  // Overflow
+  if (address > 0x6FF && !(address >= 0x7FA && address <= 0x7FF)) {
+    outputD(0);
+    return;
+  }
+
+  // Read RWB
   if (digitalRead(RWB)) {
-    WORD address = readAB();
 
-    Serial.print("AQUIIII:");
-    Serial.print(address, HEX);
+    // Return data
+    if (address == 0x7FA) outputD(mem[0x6FA]);
+    else if (address == 0x7FB) outputD(mem[0x6FB]);
+    else if (address == 0x7FC) outputD(mem[0x6FC]);
+    else if (address == 0x7FD) outputD(mem[0x6FD]);
+    else if (address == 0x7FE) outputD(mem[0x6FE]);
+    else if (address == 0x7FF) outputD(mem[0x6FF]);
+    else outputD(mem[address]);
 
-    setDataBus(0);
-    if (address == 0x7FC) {
-        outputD(0x42);
-    } else if (address == 0x7FD) {
-        outputD(0x40);
-    } else {
-      outputD(0x0);
-    }
+  } else {
+    // Make sure address is in RAM space
+    if (address < 0x0400) mem[address] = readD();
   }
 
 
