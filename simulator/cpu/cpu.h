@@ -883,6 +883,23 @@ public:
     
   }
 
+  void write(WORD address, BYTE data) {
+
+    current_cycles++;
+
+    // Set RWB to W state
+    RWB = LOW;
+    update_general_outputs();
+
+    // Output address in address bus
+    output_A(address);
+
+    delay(50);
+
+    // Output data in data bus
+    output_D(data);
+  }
+
   // Reset Sequence (7 clock cycles + 2 to load pc)
   void reset() {
 
@@ -912,7 +929,28 @@ public:
 
   }
 
-  exec_instruction(int instruction) {}
+  exec_instruction(int instruction) {
+
+    switch (instruction) {
+
+      // 2 cycles
+      case LDAhash: 
+
+        if (current_cycles == 1) {
+          A = read(PC);
+          (A & 0b10000000) ? write_P(1, 7) : write_P(0, 7);
+          (A) ? write_P(0, 1) : write_P(1, 1);
+          current_cycles = 0;
+        }
+
+        break;
+      
+      default:
+        break;
+
+    }
+
+  }
 
   // Debug (Serial)
   void debug() {
@@ -981,7 +1019,14 @@ public:
     Serial.println("");
 
     Serial.print("P: ");
-    Serial.print(P, BIN);
+    Serial.print(read_P(7), BIN);
+    Serial.print(read_P(6), BIN);
+    Serial.print(read_P(5), BIN);
+    Serial.print(read_P(4), BIN);
+    Serial.print(read_P(3), BIN);
+    Serial.print(read_P(2), BIN);
+    Serial.print(read_P(1), BIN);
+    Serial.print(read_P(0), BIN);
     Serial.println("");
     Serial.print("   NVUBDIZC");
 
@@ -991,6 +1036,9 @@ public:
     Serial.print(SP_, HEX);
     
     Serial.print("    ");
+
+    Serial.print("Instruction: ");
+    Serial.print(instruction, HEX);
     
 
     Serial.println("");
@@ -1036,9 +1084,9 @@ public:
         else {
           if (!current_cycles || !instruction) {
             instruction = read(PC);
+          } else {
+            exec_instruction(instruction);
           }
-
-          exec_instruction(instruction);
 
           // Increment PC
           PC++;
