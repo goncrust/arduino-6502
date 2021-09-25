@@ -17,7 +17,7 @@
 
 ## Info
 
-This project is still in development, many features are not yet implemented.
+THIS PROJECT IS STILL IN DEVELOPMENT, MANY FEATURES ARE NOT YET IMPLEMENTED.
 
 ### 6502 CPU Simulator
 
