@@ -929,12 +929,96 @@ public:
 
   }
 
+  WORD address_cache;
   exec_instruction(int instruction) {
 
     switch (instruction) {
 
+      // 4 cycles
+      case LDAa:
+
+        if (current_cycles == 1) {
+          address_cache = 0;
+
+          address_cache |= read(PC);
+        } else if (current_cycles == 2) {
+          address_cache |= (((WORD) read(PC)) << 8);
+        } else if (current_cycles == 3) {
+          A = read(address_cache);
+          (A & 0b10000000) ? write_P(1, 7) : write_P(0, 7);
+          (A) ? write_P(0, 1) : write_P(1, 1);
+          current_cycles = 0;
+        }
+
+        break;
+
+      // 4 cycles
+      case LDAax:
+        
+        if (current_cycles == 1) {
+          address_cache = 0;
+
+          address_cache |= read(PC);
+        } else if (current_cycles == 2) {
+          address_cache |= (((WORD) read(PC)) << 8);
+        } else if (current_cycles == 3) {
+          A = read(address_cache) + X;
+          (A & 0b10000000) ? write_P(1, 7) : write_P(0, 7);
+          (A) ? write_P(0, 1) : write_P(1, 1);
+          current_cycles = 0;
+        }
+
+        break;
+
+      // 4 cycles
+      case LDAay:
+
+        if (current_cycles == 1) {
+          address_cache = 0;
+
+          address_cache |= read(PC);
+        } else if (current_cycles == 2) {
+          address_cache |= (((WORD) read(PC)) << 8);
+        } else if (current_cycles == 3) {
+          A = read(address_cache) + Y;
+          (A & 0b10000000) ? write_P(1, 7) : write_P(0, 7);
+          (A) ? write_P(0, 1) : write_P(1, 1);
+          current_cycles = 0;
+        }
+
+        break;
+
+      // 3 cycles
+      case LDAzp:
+
+        if (current_cycles == 1) {
+          address_cache = 0;
+
+          address_cache |= read(PC);
+        } else if (current_cycles == 2) {
+          A = read(address_cache);
+          (A & 0b10000000) ? write_P(1, 7) : write_P(0, 7);
+          (A) ? write_P(0, 1) : write_P(1, 1);
+          current_cycles = 0;
+        }
+
+      
+      // 3 cycles
+      case LDAzpx:
+
+        if (current_cycles == 1) {
+          address_cache = 0;
+
+          address_cache |= read(PC);
+        } else if (current_cycles == 2) {
+          A = read(address_cache) + X;
+          (A & 0b10000000) ? write_P(1, 7) : write_P(0, 7);
+          (A) ? write_P(0, 1) : write_P(1, 1);
+          current_cycles = 0;
+        }
+        
       // 2 cycles
-      case LDAhash: 
+      case LDAhash:
 
         if (current_cycles == 1) {
           A = read(PC);
