@@ -13,7 +13,6 @@ void update_general_inputs();
 void update_address_bus();
 void update_data_bus();
 void setDataBus(int mode);
-//#include "cpu/pins.h"
 
 
 // RIGHT
