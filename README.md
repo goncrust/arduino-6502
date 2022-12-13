@@ -2,6 +2,8 @@
 
 6502 emulator/simulator for Arduino
 
+### THIS PROJECT IS STILL IN DEVELOPMENT, MANY FEATURES ARE NOT YET IMPLEMENTED.
+
 ## List of contents
 
 1. [Features](#Features)
@@ -16,8 +18,6 @@
 - 6502 CPU Emulator in C++ (without Arduino)
 
 ## Info
-
-THIS PROJECT IS STILL IN DEVELOPMENT, MANY FEATURES ARE NOT YET IMPLEMENTED.
 
 ### 6502 CPU Simulator
 
